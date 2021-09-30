@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<h1>User Detail</h1>
+
+<div class="card" style="width: 18rem;">
+  <div class="card-header">
+    {{user.fullname}}
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">Username: {{user.username}}</li>
+    <li class="list-group-item">Email: {{user.email}}</li>
+    <li class="list-group-item">First Name: {{user.first_name}}</li>
+    <li class="list-group-item">Last Name: {{user.last_name}}</li>
+  </ul>
+</div>
+
+{% if user.feedbacks %}
+  <div class="mt-5">
+    
+  <h2>Feedbacks</h2>
+    <div class="feedback-container mt-4">
+
+      {% for feedback in user.feedbacks %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{feedback.title}}</h5>
+            <p class="card-text">{{feedback.content}}</p>
+            <form>
+                <button type="submit" class="btn btn-primary" formmethod="get" formaction="/feedback/{{feedback.id}}/update">Edit</button>             
+                <button type="submit" class="btn btn-danger" formmethod="post" formaction="/feedback/{{feedback.id}}/delete">Delete</button>        
+            </form> 
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+  </div>
+{% endif %}
+
+
+<a class="btn btn-success my-5" href="/users/{{user.username}}/feedback/add">Add Feedback</a>
+
+{% endblock %}

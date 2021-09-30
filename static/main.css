@@ -1,0 +1,11 @@
+.feedback-container {
+    display: grid;
+    line-height: normal;
+    column-gap: 15px;
+    grid-template-columns: 30% 30% 30%;
+}
+
+.card {
+    width: 18rem;
+    margin: 15px;
+}
