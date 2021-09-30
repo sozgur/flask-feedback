@@ -1,23 +1,36 @@
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from models import connect_db, db, User, Feedback
-from forms import RegisterForm, LoginForm, AddFeedbackForm, EditFeedbackForm
-from secret import SECRET_KEY
+from forms import RegisterForm, LoginForm, AddFeedbackForm, EditFeedbackForm, ForgotPasswordForm, CreateNewPasswordForm
+from secret import SECRET_KEY, MAIL_USERNAME, MAIL_PASSWORD
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
+from helper import connect_mail, send_reset_email_to
+
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback2"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+
+# email settings #
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
 migrate = Migrate(app, db)
-
-
 connect_db(app)
+connect_mail(app)
+
 # db.drop_all()
 # db.create_all()
 
@@ -195,6 +208,44 @@ def delete_feedback(feedback_id):
 def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('404.html'), 404
+
+
+#### send message ####
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password_form():
+    """Show forgot password form and send a reset email
+       Create and save token on user column
+    """
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        if user:
+            send_reset_email_to(user)
+            flash("We send you email for reset your password. Please check your email.", "success")
+            return redirect("/")
+        else:
+            flash("Your email address doesn't exist on our database.", "danger")
+
+    return render_template("users/forgot_password.html", form=form)
+
+
+@app.route("/reset/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Reset password and delete a token"""
+
+    form = CreateNewPasswordForm()
+    user = User.query.filter_by(token=token).first_or_404()
+    if form.validate_on_submit():
+        password = form.password.data
+        user.reset_password(password)
+        return redirect("/login")
+
+    if user:
+        return render_template("users/reset_password.html", form=form)
+
+
+    
 
  
 

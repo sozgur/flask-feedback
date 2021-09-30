@@ -39,4 +39,18 @@ class EditFeedbackForm(FlaskForm):
     content = TextAreaField("Content", validators=[InputRequired()])
 
 
+class ForgotPasswordForm(FlaskForm):
+
+    email = StringField('Email Address', validators = [InputRequired(), 
+    Email(message="Please enter a valid email"), Length(min=6, max=35)])
+
+
+class CreateNewPasswordForm(FlaskForm):
+
+    password = PasswordField('New Password', validators=[InputRequired(), 
+        EqualTo('confirm', message='Passwords must match')])
+    confirm  = PasswordField('Repeat Password')
+
+
+
     

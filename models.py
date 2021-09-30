@@ -22,6 +22,7 @@ class User(db.Model):
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    token = db.Column(db.Text, nullable=True)
 
     feedbacks = db.relationship("Feedback", backref='user', cascade="all, delete-orphan")
 
@@ -53,6 +54,19 @@ class User(db.Model):
 
         # if there is no valid user return False
         return False
+
+    def reset_password(self, password):
+
+        hashed = bcrypt.generate_password_hash(password)
+        # turn bytestring into normal (unicode utf8) string
+        hashed_utf8 = hashed.decode("utf8")
+
+        self.password = hashed_utf8
+        self.token = None
+
+        db.session.commit()
+        return self
+
 
 class Feedback(db.Model):
 
