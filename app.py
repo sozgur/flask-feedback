@@ -5,6 +5,7 @@ from forms import RegisterForm, LoginForm, AddFeedbackForm, EditFeedbackForm
 from secret import SECRET_KEY
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
+from flask_migrate import Migrate
 
 
 app = Flask(__name__)
@@ -13,6 +14,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+migrate = Migrate(app, db)
 
 
 connect_db(app)
